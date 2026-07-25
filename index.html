@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TATTI TALES | School Squad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Quicksand', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%); background-attachment: fixed; color: #f1f5f9; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        /* Auth Screen */
+        #authScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        .auth-box { background: #fff; color: #0f172a; padding: 30px; border-radius: 16px; text-align: center; width: 90%; max-width: 380px; border: 4px solid #38bdf8; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        .auth-box h2 { font-family: 'Permanent Marker', cursive; color: #1e293b; margin-bottom: 10px; font-size: 2rem; }
+        .auth-box input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none; }
+        .auth-box button { background: #38bdf8; color: #0f172a; border: none; padding: 10px 20px; font-size: 1rem; font-family: 'Permanent Marker', cursive; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 5px; }
+        .toggle-auth { margin-top: 15px; font-size: 0.85rem; color: #64748b; cursor: pointer; font-weight: 700; }
+        .toggle-auth span { color: #db2777; text-decoration: underline; }
+
+        /* Main App Container */
+        #mainApp { display: none; width: 100%; flex-direction: column; align-items: center; }
+        header { text-align: center; margin: 25px 0 20px; }
+        h1 { font-family: 'Permanent Marker', cursive; font-size: 3.2rem; color: #38bdf8; letter-spacing: 3px; text-shadow: 3px 3px 0px #ec4899; transform: rotate(-2deg); }
+        .subtitle { color: #facc15; font-size: 1.1rem; margin-top: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; background: rgba(30, 41, 59, 0.8); padding: 6px 16px; border-radius: 20px; display: inline-block; border: 2px dashed #facc15; }
+
+        /* Navigation Tabs */
+        .nav-tabs { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; justify-content: center; }
+        .tab-btn { background: rgba(255, 255, 255, 0.1); color: #fff; border: 2px solid #38bdf8; padding: 8px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+        .tab-btn.active { background: #38bdf8; color: #0f172a; }
+
+        .tab-content { display: none; width: 100%; max-width: 1000px; flex-direction: column; align-items: center; }
+        .tab-content.active { display: flex; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; width: 100%; padding: 10px; }
+        .card { background: rgba(248, 250, 252, 0.95); color: #0f172a; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform: rotate(1deg); position: relative; }
+        .card:nth-child(even) { transform: rotate(-1.5deg); }
+        .card:hover { transform: scale(1.05) rotate(0deg); }
+        .polaroid-frame { background: #fff; padding: 10px 10px 5px 10px; border-radius: 4px; margin-bottom: 12px; overflow: hidden; }
+        .avatar { width: 100%; height: 180px; border-radius: 4px; object-fit: cover; }
+        .card h2 { font-family: 'Permanent Marker', cursive; font-size: 1.6rem; color: #1e293b; }
+        .card p.class-info { font-size: 0.9rem; color: #db2777; font-weight: 700; }
+        .badge { display: inline-block; background: #fce7f3; color: #be185d; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-top: 8px; }
+
+        /* Birthday List UI */
+        .bday-card { background: rgba(255,255,255,0.95); color: #0f172a; width: 100%; max-width: 500px; padding: 15px 20px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-left: 6px solid #ec4899; }
+        .bday-date { color: #db2777; font-family: 'Permanent Marker', cursive; font-size: 1.2rem; }
+
+        /* Admin Editor Panel */
+        .admin-panel { background: rgba(15, 23, 42, 0.9); border: 2px dashed #facc15; padding: 20px; border-radius: 12px; width: 100%; max-width: 600px; margin-top: 10px; }
+        .admin-panel h3 { font-family: 'Permanent Marker', cursive; color: #facc15; margin-bottom: 15px; font-size: 1.5rem; text-align: center; }
+        .form-group { margin-bottom: 12px; display: flex; flex-direction: column; text-align: left; }
+        .form-group label { font-size: 0.85rem; color: #38bdf8; margin-bottom: 4px; font-weight: 700; }
+        .form-group input, .form-group textarea { padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a; }
+        .save-btn { background: #10b981; color: #fff; border: none; padding: 10px; font-family: 'Permanent Marker', cursive; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px; font-size: 1rem; }
+        .reset-user-btn { background: #ef4444; color: #fff; border: none; padding: 10px; font-family: 'Permanent Marker', cursive; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 15px; font-size: 1rem; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
+        .modal-content { background: #fff; color: #0f172a; border-radius: 16px; padding: 25px; width: 100%; max-width: 380px; text-align: center; border: 4px solid #38bdf8; }
+        .modal img { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid #db2777; margin-bottom: 15px; }
+        .modal h2 { font-family: 'Permanent Marker', cursive; font-size: 2rem; color: #1e293b; }
+        .close-btn { background: #38bdf8; color: #0f172a; border: none; padding: 10px 25px; font-family: 'Permanent Marker', cursive; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <!-- AUTH SCREEN -->
+    <div id="authScreen">
+        <div class="auth-box">
+            <h2 id="authTitle">🔒 Sign In</h2>
+            <input type="email" id="authEmail" placeholder="Enter your email">
+            <input type="password" id="authPass" placeholder="Enter password">
+            <button id="authBtn" onclick="handleAuthSubmit()">Sign In</button>
+            <div class="toggle-auth" id="toggleText" onclick="toggleAuthMode()">
+                New here? <span id="toggleSpan">Sign Up</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="mainApp">
+        <header>
+            <h1>TATTI TALES</h1>
+            <div class="subtitle">✨ Class 8 Chaos Squad ✨</div>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('squad', event)">Squad Members</button>
+            <button class="tab-btn" onclick="switchTab('birthdays', event)">🎂 Birthdays</button>
+            <button class="tab-btn" id="adminTabBtn" style="display:none;" onclick="switchTab('admin', event)">⚙️ Edit Settings</button>
+            <button class="tab-btn" style="border-color:#ef4444; color:#ef4444;" onclick="logout()">🚪 Logout</button>
+        </div>
+
+        <!-- Squad Grid Tab -->
+        <div id="squadTab" class="tab-content active">
+            <div class="grid" id="squadGrid"></div>
+        </div>
+
+        <!-- Birthdays Tab -->
+        <div id="birthdaysTab" class="tab-content">
+            <div id="bdayList" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
+        </div>
+
+        <!-- Admin Editor Tab -->
+        <div id="adminTab" class="tab-content">
+            <div class="admin-panel">
+                <h3>Admin Settings & Editor</h3>
+                <div class="form-group">
+                    <label>Select Member to Edit (or type new name)</label>
+                    <input type="text" id="editName" placeholder="e.g. Anwita">
+                </div>
+                <div class="form-group">
+                    <label>Class & Age</label>
+                    <input type="text" id="editClass" placeholder="e.g. Class 8A • Age 13">
+                </div>
+                <div class="form-group">
+                    <label>Badge / Tag</label>
+                    <input type="text" id="editBadge" placeholder="e.g. The Chhipkali 🦎">
+                </div>
+                <div class="form-group">
+                    <label>Bio Details</label>
+                    <textarea id="editBio" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Birthday (e.g. 5 December)</label>
+                    <input type="text" id="editBday" placeholder="5 December">
+                </div>
+                <div class="form-group">
+                    <label>Photo Filename (e.g. 1.jpg)</label>
+                    <input type="text" id="editImg" placeholder="1.jpg">
+                </div>
+                <button class="save-btn" onclick="saveMemberData()">Save Changes to Website</button>
+                
+                <button class="reset-user-btn" onclick="masterResetUserPassword()">🔑 Master Tool: Change Any User's Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="memberModal" class="modal">
+        <div class="modal-content">
+            <img id="modalImg" src="" alt="Photo">
+            <h2 id="modalName"></h2>
+            <div id="modalClass" style="color:#db2777; font-weight:700; margin-bottom:10px;"></div>
+            <div id="modalBio" style="background:#f1f5f9; padding:12px; border-radius:8px; font-weight:700; margin-bottom:15px;"></div>
+            <button class="close-btn" onclick="closeModal()">Back</button>
+        </div>
+    </div>
+
+    <script>
+        let isSignUpMode = false;
+
+        let members = JSON.parse(localStorage.getItem('tatti_members')) || [
+            { name: 'Anwita', classInfo: 'Class 8A • Age 13', bio: 'Insta id hi nahi hai, Aradhya ki bestfriend, Har hafte bnde badalne wali', badge: 'The Chhipkali 🦎', bday: '5 December', img: '1.jpg' },
+            { name: 'Ragini', classInfo: 'Class 8E • Age 13', bio: 'Rasmalai, Keren ki bestfriend, Chhamiya', badge: 'Rasmalai 🍨', bday: '2 September', img: '2.jpg' },
+            { name: 'Keren', classInfo: 'Class 8C • Age 13', bio: 'Khatmal Keren, Ragini ki bestfriend', badge: 'Khatmal 🦟', bday: '30 November', img: '3.jpg' },
+            { name: 'Abhiraaj', classInfo: 'Class 8E • Age 13', bio: 'Bhai, Group Admin, Bndiya patane wala, Bhand', badge: 'Group Admin 👑', bday: '4 February', img: '4.jpg' },
+            { name: 'Aarav', classInfo: 'Class 8E • Age 13', bio: 'mcmojang6260, Group Admin bhai, Single', badge: 'Admin Bhai ⚡', bday: '7 August', img: '5.jpg' },
+            { name: 'Jai', classInfo: 'Class 8E • Age 13', bio: 'Owl, Group Admin, Bhai, Single', badge: 'The Owl 🦉', bday: '15 October', img: '6.jpg' },
+            { name: 'Ashvika', classInfo: 'Class 8E • Age 13', bio: 'Ashirockstar, Babykushal, Memes ki rani', badge: 'Meme Queen 👑', bday: '29 September', img: '7.jpg' }
+        ];
+
+        window.onload = function() {
+            let activeUser = localStorage.getItem('squad_active_session');
+            if(activeUser) {
+                loginSuccess(activeUser);
+            }
+        };
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            let title = document.getElementById('authTitle');
+            let btn = document.getElementById('authBtn');
+            let toggleSpan = document.getElementById('toggleSpan');
+            let toggleText = document.getElementById('toggleText');
+
+            if(isSignUpMode) {
+                title.innerText = "✍️ Sign Up";
+                btn.innerText = "Create Account";
+                toggleText.innerHTML = "Already have an account? <span id='toggleSpan'>Sign In</span>";
+            } else {
+                title.innerText = "🔒 Sign In";
+                btn.innerText = "Sign In";
+                toggleText.innerHTML = "New here? <span id='toggleSpan'>Sign Up</span>";
+            }
+        }
+
+        function handleAuthSubmit() {
+            let email = document.getElementById('authEmail').value.trim().toLowerCase();
+            let pass = document.getElementById('authPass').value.trim();
+
+            if(!email || !pass) {
+                alert('Please enter both email and password.');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('s_users_db')) || {};
+
+            if(isSignUpMode) {
+                if(users[email]) {
+                    alert('This email is already registered! You cannot sign up again with this email. Please use Sign In.');
+                    return;
+                }
+                
+                users[email] = pass;
+                localStorage.setItem('s_users_db', JSON.stringify(users));
+                alert('Account registered successfully! One sign-up complete.');
+                localStorage.setItem('squad_active_session', email);
+                loginSuccess(email);
+            } else {
+                if(email === 'aaravg78201333@gmail.com' && pass === 'admin123') {
+                    users[email] = pass;
+                    localStorage.setItem('s_users_db', JSON.stringify(users));
+                    localStorage.setItem('squad_active_session', email);
+                    loginSuccess(email);
+                    return;
+                }
+
+                if(!users[email] || users[email] !== pass) {
+                    alert('Incorrect email or password, or this email has not been signed up yet.');
+                    return;
+                }
+                localStorage.setItem('squad_active_session', email);
+                loginSuccess(email);
+            }
+        }
+
+        function masterResetUserPassword() {
+            let activeUser = localStorage.getItem('squad_active_session');
+            if(activeUser !== 'aaravg78201333@gmail.com') {
+                alert('Unauthorized! Only aaravg78201333@gmail.com can change other passwords.');
+                return;
+            }
+
+            let targetEmail = prompt("Enter the user's email whose password you want to change:");
+            if(!targetEmail) return;
+            targetEmail = targetEmail.trim().toLowerCase();
+
+            let users = JSON.parse(localStorage.getItem('s_users_db')) || {};
+            if(!users[targetEmail]) {
+                alert('This email does not exist in the database!');
+                return;
+            }
+
+            let newPass = prompt("Enter the new password for " + targetEmail + ":");
+            if(!newPass) return;
+
+            users[targetEmail] = newPass;
+            localStorage.setItem('s_users_db', JSON.stringify(users));
+            alert('Password successfully changed for ' + targetEmail + '!');
+        }
+
+        function loginSuccess(email) {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'flex';
+
+            if(email === 'aaravg78201333@gmail.com') {
+                document.getElementById('adminTabBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('adminTabBtn').style.display = 'none';
+            }
+
+            renderApp();
+        }
+
+        function logout() {
+            localStorage.removeItem('squad_active_session');
+            location.reload();
+        }
+
+        function switchTab(tabName, event) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            if(tabName === 'squad') {
+                document.getElementById('squadTab').classList.add('active');
+                if(event) event.target.classList.add('active');
+            } else if(tabName === 'birthdays') {
+                document.getElementById('birthdaysTab').classList.add('active');
+                if(event) event.target.classList.add('active');
+                renderBirthdays();
+            } else if(tabName === 'admin') {
+                document.getElementById('adminTab').classList.add('active');
+                if(event) event.target.classList.add('active');
+            }
+        }
+
+        function renderApp() {
+            let grid = document.getElementById('squadGrid');
+            grid.innerHTML = '';
+            members.forEach(m => {
+                grid.innerHTML += `
+                    <div class="card" onclick="openModal('${m.name}', '${m.classInfo}', '${m.bio}', '${m.img}')">
+                        <div class="polaroid-frame"><img src="${m.img}" alt="${m.name}" class="avatar"></div>
+                        <h2>${m.name}</h2>
+                        <p class="class-info">${m.classInfo}</p>
+                        <span class="badge">${m.badge}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderBirthdays() {
+            let list = document.getElementById('bdayList');
+            list.innerHTML = '<h2 style="font-family:\'Permanent Marker\'; color:#38bdf8; margin-bottom:20px;">🎉 Member Birthdays 🎉</h2>';
+            members.forEach(m => {
+                list.innerHTML += `
+                    <div class="bday-card">
+                        <span>${m.name}</span>
+                        <span class="bday-date">🎂 ${m.bday || 'Not Set'}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function saveMemberData() {
+            let name = document.getElementById('editName').value.trim();
+            if(!name) { alert('Please enter a member name'); return; }
+            
+            let existing = members.find(m => m.name.toLowerCase() === name.toLowerCase());
+            let data = {
+                name: name,
+                classInfo: document.getElementById('editClass').value || 'Class 8 • Age 13',
+                badge: document.getElementById('editBadge').value || 'Squad Member',
+                bio: document.getElementById('editBio').value || '',
+                bday: document.getElementById('editBday').value || '',
+                img: document.getElementById('editImg').value || '1.jpg'
+            };
+
+            if(existing) {
+                Object.assign(existing, data);
+            } else {
+                members.push(data);
+            }
+
+            localStorage.setItem('tatti_members', JSON.stringify(members));
+            alert('Successfully updated! Changes saved live.');
+            renderApp();
+            switchTab('squad');
+        }
+
+        function openModal(name, classInfo, bio, imgSrc) {
+            document.getElementById('modalName').innerText = name;
+            document.getElementById('modalClass').innerText = classInfo;
+            document.getElementById('modalBio').innerText = bio;
+            document.getElementById('modalImg').src = imgSrc;
+            document.getElementById('memberModal').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('memberModal').style.display = 'none'; }
+    </script>
+</body>
+</html>
